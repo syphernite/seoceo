@@ -10,6 +10,12 @@ export default function Hero() {
   const navigate = useNavigate();
   const domainRef = useRef<HTMLInputElement>(null);
 
+  // Robust logo resolution with fallbacks
+  const base = (import.meta.env.BASE_URL || "/").replace(/\/?$/, "/");
+  const logoCandidates = [`${base}logo.svg`, "/logo.svg", "logo.svg"];
+  const [logoIndex, setLogoIndex] = useState(0);
+  const logoSrc = logoCandidates[logoIndex];
+
   useEffect(() => {
     if (open) domainRef.current?.focus();
   }, [open]);
@@ -27,10 +33,9 @@ export default function Hero() {
 
   return (
     <section className="relative isolate text-white">
-      {/* Marble background, #010101 (1 hex from black) */}
+      {/* Marble background, #010101 */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-[#010101]" />
-        {/* soft marble sheens */}
         <div
           className="absolute inset-0 opacity-80 marble-animate slow-1"
           style={{
@@ -45,7 +50,6 @@ export default function Hero() {
               "radial-gradient(900px 520px at 18% 12%, rgba(255,255,255,0.06), transparent 60%), radial-gradient(1000px 600px at 82% 88%, rgba(255,255,255,0.05), transparent 62%)",
           }}
         />
-        {/* faint veins */}
         <div
           className="absolute inset-0 opacity-25 mix-blend-overlay marble-animate slow-3"
           style={{
@@ -53,7 +57,6 @@ export default function Hero() {
               "repeating-linear-gradient(135deg, rgba(255,255,255,0.05) 0 2px, transparent 2px 16px)",
           }}
         />
-        {/* subtle noise */}
         <div
           className="absolute inset-0 opacity-[0.06]"
           style={{
@@ -78,14 +81,21 @@ export default function Hero() {
             onClick={() => setOpen(true)}
             className="group glass-btn pulse-subtle inline-flex items-center gap-2 rounded-2xl px-7 py-3 font-semibold text-white focus:outline-none focus:ring-2 focus:ring-white/60"
           >
-            Get free audit ✒️
+            Get free audit
+            <img
+              src={logoSrc}
+              alt="logo"
+              className="ml-2 h-5 w-5 object-contain shrink-0"
+              style={{ filter: "none", mixBlendMode: "normal" }}
+              onError={() => {
+                setLogoIndex((i) => (i + 1 < logoCandidates.length ? i + 1 : i));
+              }}
+            />
             <span aria-hidden className="transition translate-x-0 group-hover:translate-x-0.5">→</span>
           </button>
         </div>
-
       </div>
 
-      {/* Popup modal */}
       {open && (
         <div
           aria-modal="true"
@@ -100,15 +110,11 @@ export default function Hero() {
           <div className="relative z-10 w-full max-w-lg rounded-2xl glass-card p-6 shadow-2xl">
             <div className="mb-4">
               <h2 className="text-xl font-semibold">Start your free audit</h2>
-              <p className="mt-1 text-sm text-white/80">
-                Enter your site and email to begin.
-              </p>
+              <p className="mt-1 text-sm text-white/80">Enter your site and email to begin.</p>
             </div>
 
             <form onSubmit={onSubmit} className="flex flex-col gap-3">
-              <label htmlFor="audit-domain" className="sr-only">
-                Website
-              </label>
+              <label htmlFor="audit-domain" className="sr-only">Website</label>
               <input
                 id="audit-domain"
                 ref={domainRef}
@@ -122,9 +128,7 @@ export default function Hero() {
                 className="glass-input w-full rounded-xl px-4 py-3 text-white placeholder-white/70 outline-none focus:ring-2 focus:ring-white/60"
               />
 
-              <label htmlFor="audit-email" className="sr-only">
-                Email
-              </label>
+              <label htmlFor="audit-email" className="sr-only">Email</label>
               <input
                 id="audit-email"
                 type="email"
@@ -156,7 +160,6 @@ export default function Hero() {
         </div>
       )}
 
-      {/* Component-scoped styles */}
       <style>{`
         @keyframes marbleShift {
           0% { transform: translate3d(0,0,0) rotate(0deg); opacity: 0.95; }

@@ -4,7 +4,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { tokens } from "../styles/tokens";
-import logo from "../assets/logo.svg";
 
 type NavItem = { label: string; type: "route" | "section"; to: string };
 
@@ -117,7 +116,8 @@ export default function Header() {
       >
         <div className={`${tokens.container} h-16 flex items-center justify-between relative`}>
           <Link to="/" className="flex items-center" aria-label="Home" onClick={() => setOpen(false)}>
-            <img src={logo} alt="Logo" className="h-12 w-12 md:h-14 md:w-14" />
+            {/* From public/ */}
+            <img src="/logo.png" alt="Logo" className="h-12 w-12 md:h-14 md:w-14" />
           </Link>
 
           <nav
