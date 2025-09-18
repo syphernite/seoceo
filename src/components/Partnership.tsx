@@ -10,10 +10,9 @@ export default function Partnership() {
         <div className={`${tokens.card} p-0 overflow-hidden`}>
           <div className="bg-neutral-900 text-white px-6 py-10 md:px-10">
             <h3 className="text-xl md:text-2xl font-semibold text-center">
-              You made it to the end — unlock a bonus demo
+              You made it to the end — unlock a free website audit and demo proposal
             </h3>
             <p className="mt-2 text-sm md:text-base text-white/80 text-center">
-              Scratch the panel to reveal your priority link and jump the queue.
             </p>
 
             <div className="mt-6 flex justify-center">
@@ -27,7 +26,6 @@ export default function Partnership() {
             </div>
 
             <p className="mt-4 text-xs text-white/70 text-center">
-              Works on touch and mouse. Accessibility: press Enter to reveal.
             </p>
           </div>
         </div>
