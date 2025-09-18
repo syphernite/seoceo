@@ -1,9 +1,10 @@
-// vite.config.ts
+// vite.config.ts  (replace)
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
-  // builds to /seo/ so the app works at /seo and /seo/
-  base: "/seo/",
+  // Custom domain serves from the root. No repo subfolder.
+  base: "/",
+  build: { outDir: "dist" },
 });
