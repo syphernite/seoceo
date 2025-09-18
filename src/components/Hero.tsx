@@ -1,35 +1,93 @@
 // src/components/Hero.tsx
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { tokens } from "../styles/tokens";
 import LogoMagnifyBars from "./LogoMagnifyBars"; // same logo used in header
+
+type Status = "idle" | "sending" | "ok" | "error";
 
 export default function Hero() {
   const [open, setOpen] = useState(false);
   const [domain, setDomain] = useState("");
   const [email, setEmail] = useState("");
-  const navigate = useNavigate();
+  const [status, setStatus] = useState<Status>("idle");
+  const [message, setMessage] = useState<string>("");
   const domainRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => { if (open) domainRef.current?.focus(); }, [open]);
+  useEffect(() => {
+    if (open) domainRef.current?.focus();
+  }, [open]);
 
-  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const d = domain.trim();
-    const m = email.trim();
-    if (!d || !m) return;
-    setOpen(false);
-    navigate(`/contact?intent=audit&step=1&domain=${encodeURIComponent(d)}&email=${encodeURIComponent(m)}`);
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault(); // stop SPA navigation
+    if (!domain.trim() || !email.trim()) return;
+
+    setStatus("sending");
+    setMessage("");
+
+    try {
+      const resp = await fetch("https://formspree.io/f/xyzdqejn", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          intent: "audit",
+          domain: domain.trim(),
+          email: email.trim(),
+          _subject: "New Free SEO Audit Request",
+        }),
+      });
+
+      if (resp.ok) {
+        setStatus("ok");
+        setMessage("Thanks. We received your request.");
+        setDomain("");
+        setEmail("");
+        // optional: close after a short delay
+        setTimeout(() => setOpen(false), 1200);
+      } else {
+        const data = await resp.json().catch(() => null);
+        const err = data?.errors?.[0]?.message || "Submit failed. Try again.";
+        setStatus("error");
+        setMessage(err);
+      }
+    } catch {
+      setStatus("error");
+      setMessage("Network error. Try again.");
+    }
   }
 
   return (
     <section className="relative isolate text-white">
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-[#010101]" />
-        <div className="absolute inset-0 opacity-80 marble-animate slow-1" style={{background:"conic-gradient(from 15deg at 22% 18%, rgba(255,255,255,0.05), rgba(255,255,255,0) 35%), conic-gradient(from 210deg at 78% 82%, rgba(255,255,255,0.04), rgba(255,255,255,0) 45%)"}}/>
-        <div className="absolute inset-0 opacity-70 marble-animate slow-2" style={{background:"radial-gradient(900px 520px at 18% 12%, rgba(255,255,255,0.06), transparent 60%), radial-gradient(1000px 600px at 82% 88%, rgba(255,255,255,0.05), transparent 62%)"}}/>
-        <div className="absolute inset-0 opacity-25 mix-blend-overlay marble-animate slow-3" style={{background:"repeating-linear-gradient(135deg, rgba(255,255,255,0.05) 0 2px, transparent 2px 16px)"}}/>
-        <div className="absolute inset-0 opacity-[0.06]" style={{backgroundImage:"radial-gradient(rgba(255,255,255,0.8) 1px, transparent 1px)",backgroundSize:"3px 3px"}}/>
+        <div
+          className="absolute inset-0 opacity-80 marble-animate slow-1"
+          style={{
+            background:
+              "conic-gradient(from 15deg at 22% 18%, rgba(255,255,255,0.05), rgba(255,255,255,0) 35%), conic-gradient(from 210deg at 78% 82%, rgba(255,255,255,0.04), rgba(255,255,255,0) 45%)",
+          }}
+        />
+        <div
+          className="absolute inset-0 opacity-70 marble-animate slow-2"
+          style={{
+            background:
+              "radial-gradient(900px 520px at 18% 12%, rgba(255,255,255,0.06), transparent 60%), radial-gradient(1000px 600px at 82% 88%, rgba(255,255,255,0.05), transparent 62%)",
+          }}
+        />
+        <div
+          className="absolute inset-0 opacity-25 mix-blend-overlay marble-animate slow-3"
+          style={{
+            background:
+              "repeating-linear-gradient(135deg, rgba(255,255,255,0.05) 0 2px, transparent 2px 16px)",
+          }}
+        />
+        <div
+          className="absolute inset-0 opacity-[0.06]"
+          style={{
+            backgroundImage:
+              "radial-gradient(rgba(255,255,255,0.8) 1px, transparent 1px)",
+            backgroundSize: "3px 3px",
+          }}
+        />
       </div>
 
       <div className={`${tokens?.container || "mx-auto max-w-6xl px-6"} py-20 text-center`}>
@@ -37,7 +95,15 @@ export default function Hero() {
         <p className="mt-4 text-lg text-neutral-300">Quick and comprehensive audits. Action plans. We get clicks.</p>
 
         <div className="mt-8 flex items-center justify-center">
-          <button type="button" onClick={() => setOpen(true)} className="group glass-btn pulse-subtle inline-flex items-center gap-2 rounded-2xl px-7 py-3 font-semibold text-white focus:outline-none focus:ring-2 focus:ring-white/60">
+          <button
+            type="button"
+            onClick={() => {
+              setMessage("");
+              setStatus("idle");
+              setOpen(true);
+            }}
+            className="group glass-btn pulse-subtle inline-flex items-center gap-2 rounded-2xl px-7 py-3 font-semibold text-white focus:outline-none focus:ring-2 focus:ring-white/60"
+          >
             Get free audit
             <LogoMagnifyBars className="ml-2 h-5 w-5 shrink-0 text-white" />
             <span aria-hidden className="transition translate-x-0 group-hover:translate-x-0.5">→</span>
@@ -46,22 +112,77 @@ export default function Hero() {
       </div>
 
       {open && (
-        <div aria-modal="true" role="dialog" className="fixed inset-0 z-50 grid place-items-center p-4" onKeyDown={(e) => e.key === "Escape" && setOpen(false)}>
+        <div
+          aria-modal="true"
+          role="dialog"
+          className="fixed inset-0 z-50 grid place-items-center p-4"
+          onKeyDown={(e) => e.key === "Escape" && setOpen(false)}
+        >
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setOpen(false)} />
           <div className="relative z-10 w-full max-w-lg rounded-2xl glass-card p-6 shadow-2xl">
             <div className="mb-4">
               <h2 className="text-xl font-semibold">Start your free audit</h2>
               <p className="mt-1 text-sm text-white/80">Enter your site and email to begin.</p>
             </div>
-            <form onSubmit={onSubmit} className="flex flex-col gap-3">
+
+            <form onSubmit={handleSubmit} className="flex flex-col gap-3" noValidate>
+              {/* honeypot to reduce bots */}
+              <input className="hidden" tabIndex={-1} autoComplete="off" name="_gotcha" />
+
               <label htmlFor="audit-domain" className="sr-only">Website</label>
-              <input id="audit-domain" ref={domainRef} type="text" inputMode="url" autoComplete="url" placeholder="yourdomain.com" value={domain} onChange={(e) => setDomain(e.target.value)} required className="glass-input w-full rounded-xl px-4 py-3 text-white placeholder-white/70 outline-none focus:ring-2 focus:ring-white/60" />
+              <input
+                id="audit-domain"
+                ref={domainRef}
+                type="text"
+                inputMode="url"
+                autoComplete="url"
+                name="domain"
+                placeholder="yourdomain.com"
+                value={domain}
+                onChange={(e) => setDomain(e.target.value)}
+                required
+                className="glass-input w-full rounded-xl px-4 py-3 text-white placeholder-white/70 outline-none focus:ring-2 focus:ring-white/60"
+              />
+
               <label htmlFor="audit-email" className="sr-only">Email</label>
-              <input id="audit-email" type="email" autoComplete="email" placeholder="you@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="glass-input w-full rounded-xl px-4 py-3 text-white placeholder-white/70 outline-none focus:ring-2 focus:ring-white/60" />
+              <input
+                id="audit-email"
+                type="email"
+                autoComplete="email"
+                name="email"
+                placeholder="you@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="glass-input w-full rounded-xl px-4 py-3 text-white placeholder-white/70 outline-none focus:ring-2 focus:ring-white/60"
+              />
+
               <div className="mt-2 flex items-center gap-3">
-                <button type="submit" className="glass-cta rounded-2xl px-5 py-3 font-semibold text-white focus:outline-none focus:ring-2 focus:ring-white/60">Continue →</button>
-                <button type="button" onClick={() => setOpen(false)} className="glass-btn-secondary rounded-2xl px-5 py-3 text-sm text-white/90">Cancel</button>
+                <button
+                  type="submit"
+                  disabled={status === "sending"}
+                  className="glass-cta rounded-2xl px-5 py-3 font-semibold text-white focus:outline-none focus:ring-2 focus:ring-white/60 disabled:opacity-60"
+                >
+                  {status === "sending" ? "Sending..." : "Continue →"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="glass-btn-secondary rounded-2xl px-5 py-3 text-sm text-white/90"
+                >
+                  Cancel
+                </button>
               </div>
+
+              {message && (
+                <p
+                  className={`mt-3 text-sm ${
+                    status === "ok" ? "text-emerald-300" : "text-red-300"
+                  }`}
+                >
+                  {message}
+                </p>
+              )}
             </form>
           </div>
         </div>
