@@ -7,26 +7,21 @@ export default function Partnership() {
   return (
     <section className={tokens.section}>
       <div className={tokens.container}>
-        <div className={`${tokens.card} p-0 overflow-hidden`}>
-          <div className="bg-neutral-900 text-white px-6 py-10 md:px-10">
-            <h3 className="text-xl md:text-2xl font-semibold text-center">
-              You made it to the end — Follow the prompt to unlock a free website
-            </h3>
-            <p className="mt-2 text-sm md:text-base text-white/80 text-center">
-            </p>
+        {/* Heading moved above the scratch field and flipped to black */}
+        <h3 className="text-xl md:text-2xl font-semibold text-center text-black mb-4">
+          No Website? Follow the prompts to unlock a free, custom site.
+        </h3>
 
-            <div className="mt-6 flex justify-center">
-              <ScratchCTA
-                width={720}
-                height={180}
-                revealHref="https://built4you.org"
-                revealLabel="Start priority demo"
-                code="PRIORITY-END"
-              />
-            </div>
-
-            <p className="mt-4 text-xs text-white/70 text-center">
-            </p>
+        <div className={`${tokens.card} p-6`}>
+          <div className="flex justify-center">
+            <ScratchCTA
+              width={720}
+              height={180}
+              revealHref="https://built4you.org"
+              revealLabel="Next"
+              code="PRIORITY-END"
+              className="w-full max-w-3xl h-44"
+            />
           </div>
         </div>
       </div>

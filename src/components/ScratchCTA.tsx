@@ -3,160 +3,158 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 type Props = {
-  revealHref: string;      // supports absolute URLs
-  className?: string;      // optional outer sizing
-  width?: number;          // optional fixed width
-  height?: number;         // optional fixed height
+  revealHref: string;
+  className?: string;
+  width?: number;
+  height?: number;
+  revealLabel?: string;
 };
 
 export default function ScratchCTA({
   revealHref,
-  className = "w-full max-w-3xl h-40 sm:h-44 md:h-48",
+  className = "w-full max-w-2xl h-40 sm:h-44 md:h-48",
   width,
   height,
+  revealLabel,
 }: Props) {
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const wrapRef = useRef<HTMLDivElement | null>(null);
   const [revealed, setRevealed] = useState(false);
 
-  useEffect(() => {
+  const paintCover = () => {
     const c = canvasRef.current;
-    const wrap = wrapperRef.current;
+    const wrap = wrapRef.current;
     if (!c || !wrap) return;
 
-    const ctx = c.getContext("2d", { willReadFrequently: true });
+    const dpr = window.devicePixelRatio || 1;
+    const w = width ?? Math.floor(wrap.clientWidth);
+    const h = height ?? Math.floor(wrap.clientHeight);
+
+    c.style.width = w + "px";
+    c.style.height = h + "px";
+    c.width = w * dpr;
+    c.height = h * dpr;
+
+    const ctx = c.getContext("2d");
     if (!ctx) return;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    const rect = wrap.getBoundingClientRect();
-    const w = Math.floor(width ?? rect.width);
-    const h = Math.floor(height ?? rect.height);
-    c.width = w;
-    c.height = h;
-
-    // Dark, near-opaque overlay
-    const grd = ctx.createLinearGradient(0, 0, w, h);
-    grd.addColorStop(0, "rgba(12,14,20,0.98)");
-    grd.addColorStop(1, "rgba(28,32,44,0.98)");
-    ctx.fillStyle = grd;
+    ctx.fillStyle = "#0a0a0a";
     ctx.fillRect(0, 0, w, h);
+    ctx.strokeStyle = "rgba(255,255,255,0.2)";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(1, 1, w - 2, h - 2);
 
-    // Subtle foil highlight
-    const highlight = ctx.createLinearGradient(0, 0, 0, Math.max(20, h * 0.12));
-    highlight.addColorStop(0, "rgba(255,255,255,0.10)");
-    highlight.addColorStop(1, "rgba(255,255,255,0.00)");
-    ctx.fillStyle = highlight;
-    ctx.fillRect(0, 0, w, Math.max(20, h * 0.12));
-
-    // Instruction text on the overlay
-    ctx.font = `${Math.max(16, Math.floor(h * 0.18))}px ui-sans-serif, system-ui`;
-    ctx.fillStyle = "rgba(255,255,255,0.9)";
+    ctx.fillStyle = "rgba(255,255,255,0.85)";
+    const fs = Math.max(14, Math.min(28, Math.floor(w / 18)));
+    ctx.font = `600 ${fs}px system-ui, -apple-system, Segoe UI, Roboto`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText("Scratch to reveal", w / 2, h / 2);
+  };
 
-    // Erase blending
-    let down = false;
-    const eraseRadius = Math.max(16, Math.floor(Math.min(w, h) * 0.06));
+  useEffect(() => {
+    paintCover();
+    const onResize = () => {
+      if (!revealed) paintCover();
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [width, height]);
 
-    const scratch = (x: number, y: number) => {
+  useEffect(() => {
+    const c = canvasRef.current;
+    if (!c) return;
+    const ctx = c.getContext("2d");
+    if (!ctx) return;
+
+    let drawing = false;
+
+    const scratchAt = (x: number, y: number) => {
       ctx.globalCompositeOperation = "destination-out";
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+      ctx.lineWidth = 36;
       ctx.beginPath();
-      ctx.arc(x, y, eraseRadius, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.globalCompositeOperation = "source-over";
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + 0.01, y + 0.01);
+      ctx.stroke();
     };
 
-    const getXY = (e: PointerEvent) => {
-      const r = c.getBoundingClientRect();
-      return { x: e.clientX - r.left, y: e.clientY - r.top };
+    const pointerPos = (e: PointerEvent) => {
+      const rect = c.getBoundingClientRect();
+      return { x: e.clientX - rect.left, y: e.clientY - rect.top };
     };
 
     const onDown = (e: PointerEvent) => {
-      down = true;
-      const { x, y } = getXY(e);
-      scratch(x, y);
-    };
-    const onMove = (e: PointerEvent) => {
-      if (!down) return;
-      const { x, y } = getXY(e);
-      scratch(x, y);
-    };
-    const onUp = () => {
-      down = false;
-      // when first fully revealed, fade overlay
-      setRevealed(true);
-      c.style.transition = "opacity 300ms ease";
-      c.style.opacity = "0";
-      setTimeout(() => (c.style.display = "none"), 320);
+      drawing = true;
+      c.setPointerCapture(e.pointerId);
+      const { x, y } = pointerPos(e);
+      scratchAt(x, y);
+      e.preventDefault();
     };
 
-    c.addEventListener("pointerdown", onDown);
-    c.addEventListener("pointermove", onMove);
-    c.addEventListener("pointerup", onUp);
-    c.addEventListener("pointercancel", onUp);
+    const onMove = (e: PointerEvent) => {
+      if (!drawing) return;
+      const { x, y } = pointerPos(e);
+      scratchAt(x, y);
+      e.preventDefault();
+    };
+
+    const onUp = (e: PointerEvent) => {
+      drawing = false;
+      try { c.releasePointerCapture(e.pointerId); } catch {}
+      // immediately reveal once user stops scratching
+      setRevealed(true);
+    };
+
+    c.addEventListener("pointerdown", onDown, { passive: false });
+    c.addEventListener("pointermove", onMove, { passive: false });
+    window.addEventListener("pointerup", onUp, { passive: false });
 
     return () => {
       c.removeEventListener("pointerdown", onDown);
       c.removeEventListener("pointermove", onMove);
-      c.removeEventListener("pointerup", onUp);
-      c.removeEventListener("pointercancel", onUp);
+      window.removeEventListener("pointerup", onUp);
     };
-  }, [width, height]);
+  }, [revealed]);
 
-  const handleRevealClick = () => {
+  const go = () => {
     try {
-      if (/^https?:\/\//i.test(revealHref)) {
-        window.location.href = revealHref;
+      const url = new URL(revealHref, window.location.href);
+      if (url.origin === window.location.origin) {
+        navigate(url.pathname + url.search + url.hash);
       } else {
-        navigate(revealHref);
+        window.location.href = url.toString();
       }
     } catch {
-      window.location.href = revealHref;
+      navigate(revealHref);
     }
   };
 
   return (
-    <div className="px-4">
+    <div className={className}>
       <div
-        ref={wrapperRef}
-        className={`relative ${className}`}
-        role="button"
-        tabIndex={0}
-        onClick={() => !revealed && handleRevealClick()}
-        onKeyDown={(e) => {
-          if (!revealed && (e.key === "Enter" || e.key === " ")) handleRevealClick();
-        }}
+        ref={wrapRef}
+        className="relative mx-auto w-full h-full rounded-xl border border-black/10 bg-white"
       >
-        {/* Content revealed underneath */}
-        {revealed ? (
-          <button
-            type="button"
-            onClick={handleRevealClick}
-            className="absolute inset-0 m-auto h-12 w-48 rounded-full bg-emerald-500/90 text-white font-medium shadow-lg backdrop-blur glass-cta"
-          >
-            Go
-          </button>
-        ) : (
-          <>
-            {/* Always-visible label until reveal */}
-            <div
-              data-testid="scratch-label"
-              className="pointer-events-none absolute inset-0 flex items-center justify-center select-none"
+        {revealed && (
+          <div className="absolute inset-0 grid place-items-center">
+            <button
+              onClick={go}
+              className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white bg-emerald-600 shadow-[0_0_20px_rgba(16,185,129,0.8)] hover:shadow-[0_0_36px_rgba(16,185,129,0.9)] transition-shadow"
             >
-              <span className="text-white/90 text-base sm:text-lg font-medium tracking-wide">
-                Scratch to reveal
-              </span>
-            </div>
-          </>
+              {revealLabel ?? "Next"}
+            </button>
+          </div>
         )}
-
-        {/* overlay to scratch */}
         <canvas
           ref={canvasRef}
-          className="absolute inset-0 w-full h-full touch-none cursor-pointer"
+          className="absolute inset-0 w-full h-full touch-none cursor-pointer rounded-xl"
           role="img"
-          aria-label="Scratch to reveal your priority link"
+          aria-label="Scratch to reveal"
           style={{ display: revealed ? "none" : "block" }}
         />
       </div>

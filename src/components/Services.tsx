@@ -27,9 +27,9 @@ const Services: React.FC = () => {
       <div className={tokens.container}>
         <div className="text-center">
           <h2 className={tokens.heading.h2} data-anchor-target="true">
-            Choose one. Upgrade later.
+            How We Get You Found
           </h2>
-          <p className={`${tokens.text.muted} mt-2`}>Start simple. Switch plans anytime. No contracts.</p>
+          <p className={`${tokens.text.muted} mt-2`}>Start simple. No contracts, just results.</p>
         </div>
 
         <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
