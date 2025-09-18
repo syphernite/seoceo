@@ -10,12 +10,6 @@ export default function Hero() {
   const navigate = useNavigate();
   const domainRef = useRef<HTMLInputElement>(null);
 
-  // Robust logo resolution with fallbacks
-  const base = (import.meta.env.BASE_URL || "/").replace(/\/?$/, "/");
-  const logoCandidates = [`${base}logo.svg`, "/logo.svg", "logo.svg"];
-  const [logoIndex, setLogoIndex] = useState(0);
-  const logoSrc = logoCandidates[logoIndex];
-
   useEffect(() => {
     if (open) domainRef.current?.focus();
   }, [open]);
@@ -33,7 +27,6 @@ export default function Hero() {
 
   return (
     <section className="relative isolate text-white">
-      {/* Marble background, #010101 */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-[#010101]" />
         <div
@@ -83,13 +76,10 @@ export default function Hero() {
           >
             Get free audit
             <img
-              src={logoSrc}
+              src="/logo.ico"
               alt="logo"
               className="ml-2 h-5 w-5 object-contain shrink-0"
               style={{ filter: "none", mixBlendMode: "normal" }}
-              onError={() => {
-                setLogoIndex((i) => (i + 1 < logoCandidates.length ? i + 1 : i));
-              }}
             />
             <span aria-hidden className="transition translate-x-0 group-hover:translate-x-0.5">→</span>
           </button>
@@ -127,7 +117,6 @@ export default function Hero() {
                 required
                 className="glass-input w-full rounded-xl px-4 py-3 text-white placeholder-white/70 outline-none focus:ring-2 focus:ring-white/60"
               />
-
               <label htmlFor="audit-email" className="sr-only">Email</label>
               <input
                 id="audit-email"
@@ -139,7 +128,6 @@ export default function Hero() {
                 required
                 className="glass-input w-full rounded-xl px-4 py-3 text-white placeholder-white/70 outline-none focus:ring-2 focus:ring-white/60"
               />
-
               <div className="mt-2 flex items-center gap-3">
                 <button
                   type="submit"

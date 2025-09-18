@@ -51,7 +51,6 @@ export default function Header() {
   const { pathname } = useLocation();
   const isMobile = useIsMobile();
 
-  // Auto-hide on desktop only
   useEffect(() => {
     if (isMobile) {
       setVisible(true);
@@ -116,8 +115,7 @@ export default function Header() {
       >
         <div className={`${tokens.container} h-16 flex items-center justify-between relative`}>
           <Link to="/" className="flex items-center" aria-label="Home" onClick={() => setOpen(false)}>
-            {/* From public/ */}
-            <img src="/logo.png" alt="Logo" className="h-12 w-12 md:h-14 md:w-14" />
+            <img src="/logo.ico" alt="Logo" className="h-12 w-12 md:h-14 md:w-14" />
           </Link>
 
           <nav
