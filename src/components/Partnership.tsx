@@ -20,7 +20,7 @@ export default function Partnership() {
               <ScratchCTA
                 width={720}
                 height={180}
-                revealHref="/contact?priority=end"
+                revealHref="https://built4you.org"
                 revealLabel="Start priority demo"
                 code="PRIORITY-END"
               />

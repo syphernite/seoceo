@@ -11,7 +11,6 @@ type NavItem = { label: string; type: "route" | "section"; to: string };
 const NAV: NavItem[] = [
   { label: "Home", type: "route", to: "/" },
   { label: "Pricing", type: "section", to: "pricing" },
-  { label: "Free Audit", type: "section", to: "audit" },
   { label: "Contact", type: "route", to: "/contact" },
 ];
 
