@@ -3,55 +3,71 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 type Props = {
-  width?: number;
-  height?: number;
-  code?: string;                 // optional voucher/label to reveal
-  revealHref: string;            // where to send the user
-  revealLabel?: string;          // button label
+  code?: string;          // optional voucher/label to reveal
+  revealHref: string;     // where to send the user
+  revealLabel?: string;   // button label
+  className?: string;     // for outer sizing
 };
 
 export default function ScratchCTA({
-  width = 640,
-  height = 160,
   code = "UNLOCKED",
   revealHref,
   revealLabel = "Continue",
+  className = "w-full max-w-3xl h-40 sm:h-44 md:h-48",
 }: Props) {
   const nav = useNavigate();
-  const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [revealed, setRevealed] = useState(false);
   const [progress, setProgress] = useState(0); // 0..1
   const radius = 28;
 
-  // draw overlay
-  useEffect(() => {
+  const drawOverlay = () => {
     const c = canvasRef.current;
     if (!c) return;
-    c.width = c.offsetWidth * devicePixelRatio;
-    c.height = c.offsetHeight * devicePixelRatio;
-    const ctx = c.getContext("2d")!;
-    ctx.scale(devicePixelRatio, devicePixelRatio);
+    const dpr = typeof window !== "undefined" && window.devicePixelRatio ? window.devicePixelRatio : 1;
 
-    // base gradient overlay
-    const grd = ctx.createLinearGradient(0, 0, c.width / devicePixelRatio, c.height / devicePixelRatio);
+    const rect = c.getBoundingClientRect();
+    c.width = Math.max(1, Math.round(rect.width * dpr));
+    c.height = Math.max(1, Math.round(rect.height * dpr));
+
+    const ctx = c.getContext("2d");
+    if (!ctx) return;
+    if ((ctx as any).resetTransform) (ctx as any).resetTransform();
+    ctx.scale(dpr, dpr);
+
+    const w = rect.width;
+    const h = rect.height;
+
+    const grd = ctx.createLinearGradient(0, 0, w, h);
     grd.addColorStop(0, "rgba(255,255,255,0.92)");
-    grd.addColorStop(1, "rgba(200,200,200,0.92)");
+    grd.addColorStop(1, "rgba(210,210,210,0.92)");
     ctx.fillStyle = grd;
-    ctx.fillRect(0, 0, c.width / devicePixelRatio, c.height / devicePixelRatio);
+    ctx.fillRect(0, 0, w, h);
 
-    // hint text
     ctx.fillStyle = "rgba(0,0,0,.6)";
     ctx.font = "600 14px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("Scratch to reveal", (c.width / devicePixelRatio) / 2, (c.height / devicePixelRatio) / 2 + 5);
-  }, []);
+    ctx.textBaseline = "middle";
+    ctx.fillText("Scratch to reveal", w / 2, h / 2);
+  };
 
-  // scratch handlers
+  useEffect(() => {
+    drawOverlay();
+    const ro = new ResizeObserver(() => {
+      if (!revealed) drawOverlay();
+    });
+    const c = canvasRef.current;
+    if (c) ro.observe(c);
+    return () => ro.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [revealed]);
+
   useEffect(() => {
     const c = canvasRef.current;
     if (!c || revealed) return;
-    const ctx = c.getContext("2d")!;
+    const ctx = c.getContext("2d");
+    if (!ctx) return;
+
     let down = false;
 
     const scratch = (x: number, y: number) => {
@@ -64,9 +80,24 @@ export default function ScratchCTA({
 
     const pos = (e: PointerEvent) => {
       const r = c.getBoundingClientRect();
-      const x = (e.clientX - r.left);
-      const y = (e.clientY - r.top);
-      return { x, y };
+      return { x: e.clientX - r.left, y: e.clientY - r.top };
+    };
+
+    const measureAccurate = () => {
+      const img = ctx.getImageData(0, 0, c.width, c.height).data;
+      let cleared = 0;
+      // accurate count of cleared alpha pixels
+      for (let i = 3; i < img.length; i += 4) {
+        if (img[i] === 0) cleared++;
+      }
+      const p = cleared / (img.length / 4);
+      setProgress(p);
+      if (p >= 0.5) {
+        setRevealed(true);
+        c.style.transition = "opacity 300ms ease";
+        c.style.opacity = "0";
+        setTimeout(() => (c.style.display = "none"), 320);
+      }
     };
 
     const onDown = (e: PointerEvent) => {
@@ -80,25 +111,9 @@ export default function ScratchCTA({
       const { x, y } = pos(e);
       scratch(x, y);
     };
-    const sample = () => {
-      // estimate cleared area by sampling pixels
-      const img = ctx.getImageData(0, 0, c.width, c.height).data;
-      let cleared = 0;
-      for (let i = 3; i < img.length; i += 4 * 16) { // subsample for perf
-        if (img[i] === 0) cleared++;
-      }
-      const p = cleared / (img.length / (4 * 16));
-      setProgress(p);
-      if (p >= 0.5) {
-        setRevealed(true);
-        c.style.transition = "opacity 300ms ease";
-        c.style.opacity = "0";
-        setTimeout(() => (c.style.display = "none"), 320);
-      }
-    };
     const onUp = () => {
       down = false;
-      sample();
+      measureAccurate();
     };
 
     c.addEventListener("pointerdown", onDown);
@@ -113,7 +128,6 @@ export default function ScratchCTA({
     };
   }, [revealed]);
 
-  // keyboard fallback
   const onKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
@@ -129,15 +143,12 @@ export default function ScratchCTA({
 
   return (
     <div
-      ref={wrapRef}
-      className="relative w-full max-w-3xl rounded-xl bg-white text-neutral-900 shadow-lg ring-1 ring-black/10 overflow-hidden"
-      style={{ width, height }}
+      className={`relative rounded-xl bg-white text-neutral-900 shadow-lg ring-1 ring-black/10 overflow-hidden ${className}`}
       role="button"
       tabIndex={0}
       onKeyDown={onKeyDown}
       aria-label="Scratch to reveal your priority link"
     >
-      {/* revealed content */}
       <div className="absolute inset-0 grid place-items-center p-4">
         <div className="text-center">
           <p className="text-sm text-neutral-500">Bonus unlocked</p>
@@ -150,7 +161,7 @@ export default function ScratchCTA({
             >
               Copy code
             </button>
-            <button
+          <button
               onClick={() => nav(revealHref)}
               className="rounded-md bg-neutral-900 text-white px-4 py-2 text-sm font-medium hover:bg-neutral-800"
             >
@@ -166,7 +177,6 @@ export default function ScratchCTA({
         </div>
       </div>
 
-      {/* overlay to scratch */}
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full touch-none cursor-pointer"

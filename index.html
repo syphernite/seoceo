@@ -3,24 +3,33 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
     <meta name="theme-color" content="#000000" />
     <title>SEO Tools</title>
-    <!-- use a relative favicon so it works at /seo and /seo/ -->
-    <link rel="icon" href="favicon.ico" />
+
+    <!-- Relative favicon so it works at /seo and /seo/ -->
+    <!-- Place the file at public/favicon.png -->
+    <link rel="icon" type="image/png" href="favicon.png" />
+
     <!-- GitHub Pages deep-link restore: /seo/404.html -> /seo/?p=/seo/route -->
     <script>
       (function () {
         try {
           var p = new URLSearchParams(location.search).get("p");
           if (p) history.replaceState(null, "", p);
-        } catch (e) {}
+        } catch (_) {}
       })();
     </script>
   </head>
   <body>
+    <noscript>You need JavaScript enabled to run this app.</noscript>
     <div id="root"></div>
-    <!-- dev-safe entry: Vite serves this at /src/main.tsx; build injects hashed assets -->
+
+    <!-- Dev entry: Vite serves /src/main.tsx. In production,
+         Vite replaces this with the built /assets/* entry. -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
