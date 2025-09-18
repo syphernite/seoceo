@@ -4,7 +4,6 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
-  // Custom domain serves from the root. No repo subfolder.
-  base: "/",
-  build: { outDir: "dist" },
+  base: "/",                 // site at domain root
+  build: { outDir: "docs", emptyOutDir: true },
 });
