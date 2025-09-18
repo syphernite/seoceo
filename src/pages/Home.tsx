@@ -4,14 +4,14 @@ import Hero from "../components/Hero";
 import Services from "../components/Services";
 import Partnership from "../components/Partnership";
 import { tokens } from "../styles/tokens";
-import CrazyCTA from "../components/CrazyCTA";
+import SlideToStartCTA from "../components/SlideToStartCTA";
 
 const plan = {
   name: "Full Access",
   price: "$32.99",
   period: "per month",
   highlights: ["Instant SEO audit", "Access to all tools", "Email support", "Cancel anytime"],
-  cta: { href: "/contact", label: "Start now" },
+  cta: { href: "/contact", label: "Slide to start" },
 };
 
 export default function Home() {
@@ -38,9 +38,9 @@ export default function Home() {
                 ))}
               </ul>
 
-              {/* Hide CTA on mobile; desktop shows the big animated button */}
+              {/* Rare CTA: slide-to-start. Hidden on mobile per your layout. */}
               <div className="mt-8 hidden md:block">
-                <CrazyCTA to={plan.cta.href} label={plan.cta.label} />
+                <SlideToStartCTA to={plan.cta.href} label={plan.cta.label} />
               </div>
             </div>
           </div>
