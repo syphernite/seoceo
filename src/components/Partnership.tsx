@@ -5,24 +5,19 @@ import ScratchCTA from "./ScratchCTA";
 
 export default function Partnership() {
   return (
-    <section className={tokens.section}>
-      <div className={tokens.container}>
-        {/* Heading moved above the scratch field and flipped to black */}
-        <h3 className="text-xl md:text-2xl font-semibold text-center text-black mb-4">
+    <section className={`${tokens.section} grid place-items-center`}>
+      <div className="w-full max-w-4xl px-4 md:px-6">
+        <h3 className="text-center text-xl md:text-2xl font-semibold text-black mb-8">
           No Website? Follow the prompts to unlock a free, custom site.
         </h3>
 
-        <div className={`${tokens.card} p-6`}>
-          <div className="flex justify-center">
-            <ScratchCTA
-              width={720}
-              height={180}
-              revealHref="https://built4you.org"
-              revealLabel="Next"
-              code="PRIORITY-END"
-              className="w-full max-w-3xl h-44"
-            />
-          </div>
+        {/* hard-center wrapper */}
+        <div className="grid place-items-center">
+          <ScratchCTA
+            revealHref="https://built4you.org"
+            revealLabel="Next"
+            className="w-[min(92vw,900px)] h-[min(42vw,220px)]"
+          />
         </div>
       </div>
     </section>

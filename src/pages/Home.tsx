@@ -20,29 +20,26 @@ export default function Home() {
       <Hero />
       <Services />
 
-      <section id="pricing" className={tokens.section}>
-        <div className={tokens.container}>
-          {/* Keep original light card structure */}
-          <div className="mx-auto max-w-3xl rounded-2xl border border-neutral-200 bg-white p-8 text-black shadow-sm">
-            {/* Title + price as before */}
-            <h2 className={tokens.heading.h2} data-anchor-target="true">
-              {plan.name}
-            </h2>
-            <p className="mt-2 text-5xl font-semibold leading-tight">{plan.price}</p>
-            <p className="mt-1 text-neutral-400">{plan.period}</p>
+      <section id="pricing" className={`${tokens.section} flex flex-col items-center justify-center`}>
+        <div className="w-full max-w-3xl rounded-2xl border border-neutral-200 bg-white p-10 text-black shadow-sm flex flex-col items-center">
+          <h2 className={`${tokens.heading.h2} text-center`} data-anchor-target="true">
+            {plan.name}
+          </h2>
+          <p className="mt-2 text-5xl font-semibold leading-tight text-center">{plan.price}</p>
+          <p className="mt-1 text-neutral-400 text-center">{plan.period}</p>
 
-            {/* Two-column features on desktop, single on mobile */}
-            <ul className="mt-6 grid grid-cols-1 gap-3 text-base text-neutral-700 md:grid-cols-2">
-              {plan.highlights.map((h) => (
-                <li key={h} className="relative pl-5">
-                  <span className="absolute left-0 top-3 h-1.5 w-1.5 rounded-full bg-emerald-400/80" />
-                  {h}
-                </li>
-              ))}
-            </ul>
+          {/* evenly spaced bullet columns centered */}
+          <ul className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-y-4 md:gap-x-16 text-base text-neutral-700 w-full max-w-md">
+            {plan.highlights.map((h) => (
+              <li key={h} className="relative pl-6 text-center md:text-left">
+                <span className="absolute left-0 top-3 h-1.5 w-1.5 rounded-full bg-emerald-400/80" />
+                {h}
+              </li>
+            ))}
+          </ul>
 
-            {/* Single CTA only: visible on all breakpoints */}
-            <div className="mt-8 max-w-xl">
+          <div className="mt-10 flex justify-center w-full">
+            <div className="w-full max-w-sm">
               <SlideToStartCTA to={plan.cta.href} label={plan.cta.label} />
             </div>
           </div>

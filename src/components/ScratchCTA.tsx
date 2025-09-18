@@ -12,7 +12,7 @@ type Props = {
 
 export default function ScratchCTA({
   revealHref,
-  className = "w-full max-w-2xl h-40 sm:h-44 md:h-48",
+  className = "w-full max-w-3xl h-52",
   width,
   height,
   revealLabel,
@@ -27,27 +27,37 @@ export default function ScratchCTA({
     const wrap = wrapRef.current;
     if (!c || !wrap) return;
 
-    const dpr = window.devicePixelRatio || 1;
-    const w = width ?? Math.floor(wrap.clientWidth);
-    const h = height ?? Math.floor(wrap.clientHeight);
+    // derive size
+    let w = width ?? Math.floor(wrap.clientWidth);
+    let h = height ?? Math.floor(wrap.clientHeight);
 
+    // fallback if height is zero at first render
+    if (!h || h < 10) {
+      h = Math.max(160, Math.round((w || 720) * 0.28));
+      wrap.style.height = h + "px";
+    }
+    if (!w || w < 10) w = 720;
+
+    const dpr = window.devicePixelRatio || 1;
+
+    // CSS size
     c.style.width = w + "px";
     c.style.height = h + "px";
-    c.width = w * dpr;
-    c.height = h * dpr;
+    // backing store
+    c.width = Math.max(1, Math.floor(w * dpr));
+    c.height = Math.max(1, Math.floor(h * dpr));
 
     const ctx = c.getContext("2d");
     if (!ctx) return;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
+    // cover
     ctx.fillStyle = "#0a0a0a";
     ctx.fillRect(0, 0, w, h);
-    ctx.strokeStyle = "rgba(255,255,255,0.2)";
-    ctx.lineWidth = 2;
-    ctx.strokeRect(1, 1, w - 2, h - 2);
 
-    ctx.fillStyle = "rgba(255,255,255,0.85)";
-    const fs = Math.max(14, Math.min(28, Math.floor(w / 18)));
+    // instruction
+    ctx.fillStyle = "rgba(255,255,255,0.9)";
+    const fs = Math.max(16, Math.min(30, Math.floor(w / 18)));
     ctx.font = `600 ${fs}px system-ui, -apple-system, Segoe UI, Roboto`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -62,7 +72,7 @@ export default function ScratchCTA({
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [width, height]);
+  }, [width, height, revealed]);
 
   useEffect(() => {
     const c = canvasRef.current;
@@ -71,7 +81,6 @@ export default function ScratchCTA({
     if (!ctx) return;
 
     let drawing = false;
-
     const scratchAt = (x: number, y: number) => {
       ctx.globalCompositeOperation = "destination-out";
       ctx.lineJoin = "round";
@@ -82,44 +91,38 @@ export default function ScratchCTA({
       ctx.lineTo(x + 0.01, y + 0.01);
       ctx.stroke();
     };
-
-    const pointerPos = (e: PointerEvent) => {
-      const rect = c.getBoundingClientRect();
-      return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    const pos = (e: PointerEvent) => {
+      const r = c.getBoundingClientRect();
+      return { x: e.clientX - r.left, y: e.clientY - r.top };
     };
-
-    const onDown = (e: PointerEvent) => {
+    const down = (e: PointerEvent) => {
       drawing = true;
       c.setPointerCapture(e.pointerId);
-      const { x, y } = pointerPos(e);
+      const { x, y } = pos(e);
       scratchAt(x, y);
       e.preventDefault();
     };
-
-    const onMove = (e: PointerEvent) => {
+    const move = (e: PointerEvent) => {
       if (!drawing) return;
-      const { x, y } = pointerPos(e);
+      const { x, y } = pos(e);
       scratchAt(x, y);
       e.preventDefault();
     };
-
-    const onUp = (e: PointerEvent) => {
+    const up = (e: PointerEvent) => {
       drawing = false;
       try { c.releasePointerCapture(e.pointerId); } catch {}
-      // immediately reveal once user stops scratching
       setRevealed(true);
     };
 
-    c.addEventListener("pointerdown", onDown, { passive: false });
-    c.addEventListener("pointermove", onMove, { passive: false });
-    window.addEventListener("pointerup", onUp, { passive: false });
-
+    c.addEventListener("pointerdown", down, { passive: false });
+    c.addEventListener("pointermove", move, { passive: false });
+    window.addEventListener("pointerup", up, { passive: false });
     return () => {
-      c.removeEventListener("pointerdown", onDown);
-      c.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerup", onUp);
+      c.removeEventListener("pointerdown", down);
+      c.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
     };
-  }, [revealed]);
+  }, []);
 
   const go = () => {
     try {
@@ -135,24 +138,22 @@ export default function ScratchCTA({
   };
 
   return (
-    <div className={className}>
+    <div className={`${className} mx-auto`}>
       <div
         ref={wrapRef}
-        className="relative mx-auto w-full h-full rounded-xl border border-black/10 bg-white"
+        className="relative w-full h-full mx-auto rounded-2xl overflow-hidden bg-white flex items-center justify-center"
       >
         {revealed && (
-          <div className="absolute inset-0 grid place-items-center">
-            <button
-              onClick={go}
-              className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white bg-emerald-600 shadow-[0_0_20px_rgba(16,185,129,0.8)] hover:shadow-[0_0_36px_rgba(16,185,129,0.9)] transition-shadow"
-            >
-              {revealLabel ?? "Next"}
-            </button>
-          </div>
+          <button
+            onClick={go}
+            className="absolute z-10 inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white bg-emerald-600 shadow-[0_0_20px_rgba(16,185,129,0.8)] hover:shadow-[0_0_36px_rgba(16,185,129,0.9)] transition-shadow"
+          >
+            {revealLabel ?? "Next"}
+          </button>
         )}
         <canvas
           ref={canvasRef}
-          className="absolute inset-0 w-full h-full touch-none cursor-pointer rounded-xl"
+          className="absolute inset-0 block w-full h-full rounded-2xl touch-none cursor-pointer"
           role="img"
           aria-label="Scratch to reveal"
           style={{ display: revealed ? "none" : "block" }}
