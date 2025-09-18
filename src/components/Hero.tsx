@@ -69,7 +69,7 @@ export default function Hero() {
           Seo that pays for itself
         </h1>
         <p className="mt-4 text-lg text-neutral-300">
-          Lightning audits. Action plans. Proven growth.
+          Quick and comprehensive audits. Action plans. We get clicks.
         </p>
 
         <div className="mt-8 flex items-center justify-center">
