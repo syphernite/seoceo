@@ -75,8 +75,9 @@ export default function Hero() {
             className="group glass-btn pulse-subtle inline-flex items-center gap-2 rounded-2xl px-7 py-3 font-semibold text-white focus:outline-none focus:ring-2 focus:ring-white/60"
           >
             Get free audit
+            {/* use PNG from /public */}
             <img
-              src="/logo.ico"
+              src="/logo.png"
               alt="logo"
               className="ml-2 h-5 w-5 object-contain shrink-0"
               style={{ filter: "none", mixBlendMode: "normal" }}
@@ -166,49 +167,17 @@ export default function Hero() {
         }
         .pulse-subtle { animation: softPulse 5s ease-in-out infinite; }
 
-        .glass-btn {
-          border: 1px solid rgba(255,255,255,0.18);
-          background: rgba(255,255,255,0.08);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          transition: background .2s ease, border-color .2s ease, transform .2s ease;
-        }
+        .glass-btn { border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.08); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); transition: background .2s ease, border-color .2s ease, transform .2s ease; }
         .glass-btn:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.28); transform: translateY(-1px); }
 
-        .glass-card {
-          border: 1px solid rgba(255,255,255,0.15);
-          background: rgba(255,255,255,0.08);
-          backdrop-filter: blur(24px);
-          -webkit-backdrop-filter: blur(24px);
-          box-shadow: 0 0 28px rgba(255,255,255,0.10), inset 0 1px 0 rgba(255,255,255,.25);
-        }
+        .glass-card { border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.08); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: 0 0 28px rgba(255,255,255,0.10), inset 0 1px 0 rgba(255,255,255,.25); }
 
-        .glass-input {
-          border: 1px solid rgba(255,255,255,0.20);
-          background: rgba(255,255,255,0.08);
-          backdrop-filter: blur(14px);
-          -webkit-backdrop-filter: blur(14px);
-          box-shadow: inset 0 1px 0 rgba(255,255,255,.25);
-        }
+        .glass-input { border: 1px solid rgba(255,255,255,0.20); background: rgba(255,255,255,0.08); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: inset 0 1px 0 rgba(255,255,255,.25); }
 
-        .glass-cta {
-          border: 1px solid rgba(255,255,255,0.35);
-          background: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.10));
-          color: #fff;
-          box-shadow: 0 0 24px rgba(255,255,255,0.12), inset 0 1px 0 rgba(255,255,255,.35);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          transition: opacity .2s ease, transform .2s ease, box-shadow .2s ease;
-        }
+        .glass-cta { border: 1px solid rgba(255,255,255,0.35); background: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.10)); color: #fff; box-shadow: 0 0 24px rgba(255,255,255,0.12), inset 0 1px 0 rgba(255,255,255,.35); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); transition: opacity .2s ease, transform .2s ease, box-shadow .2s ease; }
         .glass-cta:hover { opacity: .95; transform: translateY(-1px); box-shadow: 0 0 30px rgba(255,255,255,0.16), inset 0 1px 0 rgba(255,255,255,.45); }
 
-        .glass-btn-secondary {
-          border: 1px solid rgba(255,255,255,0.18);
-          background: rgba(255,255,255,0.10);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          transition: background .2s ease, border-color .2s ease, transform .2s ease;
-        }
+        .glass-btn-secondary { border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.10); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); transition: background .2s ease, border-color .2s ease, transform .2s ease; }
         .glass-btn-secondary:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.26); transform: translateY(-1px); }
       `}</style>
     </section>
