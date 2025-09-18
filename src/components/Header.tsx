@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { tokens } from "../styles/tokens";
+import LogoMagnifyBars from "./LogoMagnifyBars"; // choose which logo component you want
 
 type NavItem = { label: string; type: "route" | "section"; to: string };
 
@@ -115,8 +116,7 @@ export default function Header() {
       >
         <div className={`${tokens.container} h-16 flex items-center justify-between relative`}>
           <Link to="/" className="flex items-center" aria-label="Home" onClick={() => setOpen(false)}>
-            {/* use PNG from /public */}
-            <img src="/logo.png" alt="Logo" className="h-12 w-12 md:h-14 md:w-14" />
+            <LogoMagnifyBars className="h-12 w-12 md:h-14 md:w-14 text-black" />
           </Link>
 
           <nav
