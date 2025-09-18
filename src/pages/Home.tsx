@@ -22,26 +22,28 @@ export default function Home() {
 
       <section id="pricing" className={tokens.section}>
         <div className={tokens.container}>
-          <h2 className={tokens.heading.h2}>Get access for just $32.99/month</h2>
-          <p className={`${tokens.text.muted} mt-2`}>Simple, flat pricing. No hidden fees.</p>
+          {/* Keep original light card structure */}
+          <div className="mx-auto max-w-3xl rounded-2xl border border-neutral-200 bg-white p-8 text-black shadow-sm">
+            {/* Title + price as before */}
+            <h2 className={tokens.heading.h2} data-anchor-target="true">
+              {plan.name}
+            </h2>
+            <p className="mt-2 text-5xl font-semibold leading-tight">{plan.price}</p>
+            <p className="mt-1 text-neutral-400">{plan.period}</p>
 
-          <div className="mt-10 grid gap-6 sm:grid-cols-1 lg:grid-cols-1">
-            <div className={tokens.card}>
-              <h3 className={tokens.heading.h3}>{plan.name}</h3>
-              <p className="text-3xl font-semibold">{plan.price}</p>
-              <p className={tokens.text.muted}>{plan.period}</p>
-              <ul className="mt-4 space-y-2">
-                {plan.highlights.map((h) => (
-                  <li key={h} className={tokens.text.body}>
-                    • {h}
-                  </li>
-                ))}
-              </ul>
+            {/* Two-column features on desktop, single on mobile */}
+            <ul className="mt-6 grid grid-cols-1 gap-3 text-base text-neutral-700 md:grid-cols-2">
+              {plan.highlights.map((h) => (
+                <li key={h} className="relative pl-5">
+                  <span className="absolute left-0 top-3 h-1.5 w-1.5 rounded-full bg-emerald-400/80" />
+                  {h}
+                </li>
+              ))}
+            </ul>
 
-              {/* Rare CTA: slide-to-start. Hidden on mobile per your layout. */}
-              <div className="mt-8 hidden md:block">
-                <SlideToStartCTA to={plan.cta.href} label={plan.cta.label} />
-              </div>
+            {/* Single CTA only: visible on all breakpoints */}
+            <div className="mt-8 max-w-xl">
+              <SlideToStartCTA to={plan.cta.href} label={plan.cta.label} />
             </div>
           </div>
         </div>

@@ -16,19 +16,23 @@ const items = [
   },
   {
     icon: MapPin,
-    title: "Local SEO",
-    desc: "Maps and reviews. Citations cleaned. Rankings where it matters: near your customers, wherever they are.",
+    title: "Local",
+    desc: "Maps, NAP, citations, reviews, and service area pages that actually rank.",
   },
 ];
 
-export const Services = () => {
+const Services: React.FC = () => {
   return (
-    <section className={tokens.section}>
+    <section id="services" className={tokens.section}>
       <div className={tokens.container}>
-        <h2 className={tokens.heading.h2}>Simple services that compound</h2>
-        <p className={`${tokens.text.muted} mt-2`}>Pick one. Upgrade later. No long contracts.</p>
+        <div className="text-center">
+          <h2 className={tokens.heading.h2} data-anchor-target="true">
+            Choose one. Upgrade later.
+          </h2>
+          <p className={`${tokens.text.muted} mt-2`}>Start simple. Switch plans anytime. No contracts.</p>
+        </div>
 
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {items.map(({ icon: Icon, title, desc }) => (
             <div key={title} className={tokens.card}>
               <Icon className="h-6 w-6" />

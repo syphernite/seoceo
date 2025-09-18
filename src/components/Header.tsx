@@ -14,18 +14,6 @@ const NAV: NavItem[] = [
   { label: "Contact", type: "route", to: "/contact" },
 ];
 
-function useIsMobile() {
-  const [mobile, setMobile] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 767px)");
-    const upd = () => setMobile(mq.matches);
-    upd();
-    mq.addEventListener ? mq.addEventListener("change", upd) : mq.addListener(upd);
-    return () => (mq.removeEventListener ? mq.removeEventListener("change", upd) : mq.removeListener(upd));
-  }, []);
-  return mobile;
-}
-
 function findAnchor(id: string): HTMLElement | null {
   const root = document.getElementById(id);
   if (!root) return null;
@@ -36,45 +24,32 @@ function findAnchor(id: string): HTMLElement | null {
 }
 
 function headerOffsetPx(headerEl: HTMLElement | null): number {
-  const h = headerEl ? headerEl.offsetHeight : 72;
-  return h + 12;
+  const h = headerEl ? headerEl.offsetHeight : 64;
+  return h + 8; // small gap
 }
 
 export default function Header() {
-  const [open, setOpen] = useState(false);
-  const [visible, setVisible] = useState(true);
-  const [atTop, setAtTop] = useState(true);
-  const lastY = useRef<number>(0);
-  const ticking = useRef(false);
-  const headerRef = useRef<HTMLElement | null>(null);
-
-  const navigate = useNavigate();
   const { pathname } = useLocation();
-  const isMobile = useIsMobile();
+  const navigate = useNavigate();
+  const headerRef = useRef<HTMLElement | null>(null);
+  const [open, setOpen] = useState(false);
+  const [atTop, setAtTop] = useState(true);
+  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    if (isMobile) {
-      setVisible(true);
-      return;
-    }
+    let lastY = window.scrollY;
     const onScroll = () => {
-      if (ticking.current) return;
-      ticking.current = true;
-      requestAnimationFrame(() => {
-        const y = window.scrollY;
-        const dy = y - lastY.current;
-        setAtTop(y < 8);
-        if (y < 80) setVisible(true);
-        else if (dy > 2) setVisible(false);
-        else if (dy < -2) setVisible(true);
-        lastY.current = y;
-        ticking.current = false;
-      });
+      const y = window.scrollY;
+      setAtTop(y < 8);
+      setVisible(y < lastY || y < 160);
+      lastY = y;
     };
-    lastY.current = window.scrollY;
     window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
     return () => window.removeEventListener("scroll", onScroll);
-  }, [isMobile]);
+  }, []);
+
+  const translateClass = visible ? "translate-y-0" : "-translate-y-full";
 
   const scrollWithOffset = useCallback((id: string) => {
     const target = findAnchor(id);
@@ -89,6 +64,7 @@ export default function Header() {
 
   const goSection = useCallback(
     (id: string) => {
+      setOpen(false);
       if (pathname !== "/") {
         navigate("/", { replace: false });
         requestAnimationFrame(() =>
@@ -100,8 +76,6 @@ export default function Header() {
     },
     [navigate, pathname, scrollWithOffset]
   );
-
-  const translateClass = isMobile ? "translate-y-0" : visible ? "translate-y-0" : "-translate-y-full";
 
   return (
     <>
@@ -119,6 +93,7 @@ export default function Header() {
             <LogoMagnifyBars className="h-12 w-12 md:h-14 md:w-14 text-black" />
           </Link>
 
+          {/* Desktop */}
           <nav
             className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2"
             aria-label="Primary"
@@ -132,7 +107,7 @@ export default function Header() {
                 <button
                   key={item.label}
                   type="button"
-                  onClick={() => goSection(item.to)}
+                  onClick={() => { setOpen(false); goSection(item.to); }}
                   className="text-sm text-neutral-800 hover:text-neutral-900"
                 >
                   {item.label}
@@ -141,68 +116,67 @@ export default function Header() {
             )}
           </nav>
 
-          <div className="hidden md:block">
-            <button type="button" className={tokens.button.primary} onClick={() => goSection("pricing")}>
-              Get popular today
-            </button>
-          </div>
-
+          {/* Mobile toggle */}
           <button
-            aria-label="Toggle menu"
-            className="md:hidden rounded-lg p-2 hover:bg-neutral-100"
+            className="md:hidden inline-flex items-center justify-center p-2 rounded-md border border-neutral-300"
+            aria-label="Open menu"
             onClick={() => setOpen((v) => !v)}
           >
-            {open ? <X /> : <Menu />}
+            <Menu className="h-5 w-5" />
           </button>
-        </div>
 
-        <AnimatePresence>
-          {open && (
-            <motion.div
-              initial={{ height: 0 }}
-              animate={{ height: "auto" }}
-              exit={{ height: 0 }}
-              className="md:hidden border-t border-neutral-200 bg-white overflow-hidden"
-            >
-              <div className={`${tokens.container} py-4 flex flex-col gap-2`}>
-                {NAV.map((item) =>
-                  item.type === "route" ? (
-                    <Link
-                      key={item.label}
-                      to={item.to}
-                      className="py-2 text-neutral-800"
-                      onClick={() => setOpen(false)}
-                    >
-                      {item.label}
-                    </Link>
-                  ) : (
-                    <button
-                      key={item.label}
-                      type="button"
-                      className="py-2 text-left text-neutral-800"
-                      onClick={() => {
-                        setOpen(false);
-                        goSection(item.to);
-                      }}
-                    >
-                      {item.label}
-                    </button>
-                  )
-                )}
+          {/* Mobile dropdown */}
+          <AnimatePresence>
+            {open && (
+              <motion.div
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                className="absolute top-full right-4 mt-2 w-48 rounded-lg border border-neutral-200 bg-white shadow-lg p-2 md:hidden"
+              >
                 <button
-                  type="button"
-                  className={tokens.button.primary}
-                  onClick={() => {
-                    setOpen(false);
-                    goSection("pricing");
-                  }}
+                  className="absolute top-1 right-1 p-2"
+                  aria-label="Close menu"
+                  onClick={() => setOpen(false)}
                 >
-                  Subscribe $32.99
+                  <X className="h-4 w-4" />
                 </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+
+                <div className="pt-6 flex flex-col gap-1">
+                  {NAV.map((item) =>
+                    item.type === "route" ? (
+                      <Link
+                        key={item.label}
+                        to={item.to}
+                        onClick={() => setOpen(false)}
+                        className="px-3 py-2 rounded hover:bg-neutral-100 text-sm"
+                      >
+                        {item.label}
+                      </Link>
+                    ) : (
+                      <button
+                        key={item.label}
+                        type="button"
+                        className="px-3 py-2 rounded hover:bg-neutral-100 text-left text-sm"
+                        onClick={() => { setOpen(false); goSection(item.to); }}
+                      >
+                        {item.label}
+                      </button>
+                    )
+                  )}
+
+                  <button
+                    type="button"
+                    className={tokens.button.primary + " mt-2"}
+                    onClick={() => { setOpen(false); goSection("pricing"); }}
+                  >
+                    Subscribe $32.99
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </header>
 
       <div aria-hidden className="h-16" />

@@ -15,30 +15,24 @@ export default function ScratchCTA({
   width,
   height,
 }: Props) {
-  const nav = useNavigate();
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const navigate = useNavigate();
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [revealed, setRevealed] = useState(false);
-  const radius = 28;
 
-  const drawOverlay = () => {
+  useEffect(() => {
     const c = canvasRef.current;
-    if (!c) return;
-    const dpr = typeof window !== "undefined" && window.devicePixelRatio ? window.devicePixelRatio : 1;
+    const wrap = wrapperRef.current;
+    if (!c || !wrap) return;
 
-    if (width) c.style.width = `${width}px`;
-    if (height) c.style.height = `${height}px`;
-
-    const rect = c.getBoundingClientRect();
-    c.width = Math.max(1, Math.round(rect.width * dpr));
-    c.height = Math.max(1, Math.round(rect.height * dpr));
-
-    const ctx = c.getContext("2d");
+    const ctx = c.getContext("2d", { willReadFrequently: true });
     if (!ctx) return;
-    (ctx as any).resetTransform?.();
-    ctx.scale(dpr, dpr);
 
-    const w = rect.width;
-    const h = rect.height;
+    const rect = wrap.getBoundingClientRect();
+    const w = Math.floor(width ?? rect.width);
+    const h = Math.floor(height ?? rect.height);
+    c.width = w;
+    c.height = h;
 
     // Dark, near-opaque overlay
     const grd = ctx.createLinearGradient(0, 0, w, h);
@@ -54,55 +48,38 @@ export default function ScratchCTA({
     ctx.fillStyle = highlight;
     ctx.fillRect(0, 0, w, Math.max(20, h * 0.12));
 
-    // Hint text
-    ctx.fillStyle = "rgba(255,255,255,.75)";
-    ctx.font = "600 14px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+    // Instruction text on the overlay
+    ctx.font = `${Math.max(16, Math.floor(h * 0.18))}px ui-sans-serif, system-ui`;
+    ctx.fillStyle = "rgba(255,255,255,0.9)";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText("Scratch to reveal", w / 2, h / 2);
-  };
 
-  useEffect(() => {
-    drawOverlay();
-    const ro = new ResizeObserver(() => {
-      if (!revealed) drawOverlay();
-    });
-    const c = canvasRef.current;
-    if (c) ro.observe(c);
-    return () => ro.disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [revealed, width, height]);
-
-  useEffect(() => {
-    const c = canvasRef.current;
-    if (!c || revealed) return;
-    const ctx = c.getContext("2d");
-    if (!ctx) return;
-
+    // Erase blending
     let down = false;
+    const eraseRadius = Math.max(16, Math.floor(Math.min(w, h) * 0.06));
 
     const scratch = (x: number, y: number) => {
       ctx.globalCompositeOperation = "destination-out";
       ctx.beginPath();
-      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.arc(x, y, eraseRadius, 0, Math.PI * 2);
       ctx.fill();
-      ctx.closePath();
+      ctx.globalCompositeOperation = "source-over";
     };
 
-    const pos = (e: PointerEvent) => {
+    const getXY = (e: PointerEvent) => {
       const r = c.getBoundingClientRect();
       return { x: e.clientX - r.left, y: e.clientY - r.top };
     };
 
     const onDown = (e: PointerEvent) => {
       down = true;
-      c.setPointerCapture(e.pointerId);
-      const { x, y } = pos(e);
+      const { x, y } = getXY(e);
       scratch(x, y);
     };
     const onMove = (e: PointerEvent) => {
       if (!down) return;
-      const { x, y } = pos(e);
+      const { x, y } = getXY(e);
       scratch(x, y);
     };
     const onUp = () => {
@@ -118,78 +95,71 @@ export default function ScratchCTA({
     c.addEventListener("pointermove", onMove);
     c.addEventListener("pointerup", onUp);
     c.addEventListener("pointercancel", onUp);
+
     return () => {
       c.removeEventListener("pointerdown", onDown);
       c.removeEventListener("pointermove", onMove);
       c.removeEventListener("pointerup", onUp);
       c.removeEventListener("pointercancel", onUp);
     };
-  }, [revealed]);
+  }, [width, height]);
 
-  const onKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      setRevealed(true);
-      const c = canvasRef.current;
-      if (c) {
-        c.style.transition = "opacity 300ms ease";
-        c.style.opacity = "0";
-        setTimeout(() => (c.style.display = "none"), 320);
+  const handleRevealClick = () => {
+    try {
+      if (/^https?:\/\//i.test(revealHref)) {
+        window.location.href = revealHref;
+      } else {
+        navigate(revealHref);
       }
-    }
-  };
-
-  const go = () => {
-    if (/^https?:\/\//i.test(revealHref)) {
+    } catch {
       window.location.href = revealHref;
-    } else {
-      nav(revealHref);
     }
   };
-
-  const styleInline: React.CSSProperties =
-    width || height ? { width: width ? `${width}px` : undefined, height: height ? `${height}px` : undefined } : {};
 
   return (
-    <div
-      className={`relative rounded-xl bg-white text-neutral-900 shadow-lg ring-1 ring-black/10 overflow-hidden ${className}`}
-      role="button"
-      tabIndex={0}
-      onKeyDown={onKeyDown}
-      aria-label="Scratch to reveal your priority link"
-      style={styleInline}
-    >
-      {/* revealed content: ONLY the glowing button */}
-      <div className="absolute inset-0 grid place-items-center p-4">
-        {revealed && (
+    <div className="px-4">
+      <div
+        ref={wrapperRef}
+        className={`relative ${className}`}
+        role="button"
+        tabIndex={0}
+        onClick={() => !revealed && handleRevealClick()}
+        onKeyDown={(e) => {
+          if (!revealed && (e.key === "Enter" || e.key === " ")) handleRevealClick();
+        }}
+      >
+        {/* Content revealed underneath */}
+        {revealed ? (
+          <button
+            type="button"
+            onClick={handleRevealClick}
+            className="absolute inset-0 m-auto h-12 w-48 rounded-full bg-emerald-500/90 text-white font-medium shadow-lg backdrop-blur glass-cta"
+          >
+            Go
+          </button>
+        ) : (
           <>
-            {/* local styles for the glow */}
-            <style>{`
-              @keyframes crazyGlow {
-                0% { box-shadow: 0 0 10px rgba(0,0,0,0.5), 0 0 20px rgba(16,185,129,0.35), 0 0 40px rgba(59,130,246,0.35); transform: scale(1); }
-                50% { box-shadow: 0 0 24px rgba(0,0,0,0.7), 0 0 60px rgba(16,185,129,0.55), 0 0 90px rgba(59,130,246,0.55); transform: scale(1.015); }
-                100% { box-shadow: 0 0 10px rgba(0,0,0,0.5), 0 0 20px rgba(16,185,129,0.35), 0 0 40px rgba(59,130,246,0.35); transform: scale(1); }
-              }
-              .glow-crazy {
-                animation: crazyGlow 1.2s ease-in-out infinite;
-              }
-            `}</style>
-            <button
-              onClick={go}
-              className="glow-crazy rounded-md bg-neutral-900 text-white px-6 py-3 text-base md:text-lg font-semibold"
+            {/* Always-visible label until reveal */}
+            <div
+              data-testid="scratch-label"
+              className="pointer-events-none absolute inset-0 flex items-center justify-center select-none"
             >
-              Get Free Demo
-            </button>
+              <span className="text-white/90 text-base sm:text-lg font-medium tracking-wide">
+                Scratch to reveal
+              </span>
+            </div>
           </>
         )}
-      </div>
 
-      {/* overlay to scratch */}
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 w-full h-full touch-none cursor-pointer"
-        style={{ display: revealed ? "none" : "block" }}
-      />
+        {/* overlay to scratch */}
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 w-full h-full touch-none cursor-pointer"
+          role="img"
+          aria-label="Scratch to reveal your priority link"
+          style={{ display: revealed ? "none" : "block" }}
+        />
+      </div>
     </div>
   );
 }
