@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { tokens } from "../styles/tokens";
-import LogoMagnifyBars from "./LogoMagnifyBars"; // choose which logo component you want
+import LogoMagnifyBars from "./LogoMagnifyBars";
 
 type NavItem = { label: string; type: "route" | "section"; to: string };
 
@@ -25,7 +25,7 @@ function findAnchor(id: string): HTMLElement | null {
 
 function headerOffsetPx(headerEl: HTMLElement | null): number {
   const h = headerEl ? headerEl.offsetHeight : 64;
-  return h + 8; // small gap
+  return h + 8;
 }
 
 export default function Header() {
@@ -89,11 +89,12 @@ export default function Header() {
         ].join(" ")}
       >
         <div className={`${tokens.container} h-16 flex items-center justify-between relative`}>
+          {/* Left: Logo */}
           <Link to="/" className="flex items-center" aria-label="Home" onClick={() => setOpen(false)}>
             <LogoMagnifyBars className="h-12 w-12 md:h-14 md:w-14 text-black" />
           </Link>
 
-          {/* Desktop */}
+          {/* Center: desktop nav */}
           <nav
             className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2"
             aria-label="Primary"
@@ -107,7 +108,10 @@ export default function Header() {
                 <button
                   key={item.label}
                   type="button"
-                  onClick={() => { setOpen(false); goSection(item.to); }}
+                  onClick={() => {
+                    setOpen(false);
+                    goSection(item.to);
+                  }}
                   className="text-sm text-neutral-800 hover:text-neutral-900"
                 >
                   {item.label}
@@ -116,14 +120,26 @@ export default function Header() {
             )}
           </nav>
 
-          {/* Mobile toggle */}
-          <button
-            className="md:hidden inline-flex items-center justify-center p-2 rounded-md border border-neutral-300"
-            aria-label="Open menu"
-            onClick={() => setOpen((v) => !v)}
-          >
-            <Menu className="h-5 w-5" />
-          </button>
+          {/* Right: glass login + mobile toggle */}
+          <div className="flex items-center gap-2">
+            {/* Use darker glass so it’s visible on white header */}
+            <Link
+              to="/login"
+              onClick={() => setOpen(false)}
+              className="inline-flex items-center rounded-xl px-4 py-2 text-sm font-medium text-neutral-900 backdrop-blur-md bg-black/10 border border-black/20 hover:bg-black/15 ring-1 ring-black/5 shadow-sm transition"
+            >
+              Log in
+            </Link>
+
+            {/* Mobile menu button */}
+            <button
+              className="md:hidden inline-flex items-center justify-center p-2 rounded-md border border-neutral-300"
+              aria-label="Open menu"
+              onClick={() => setOpen((v) => !v)}
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+          </div>
 
           {/* Mobile dropdown */}
           <AnimatePresence>
@@ -158,20 +174,24 @@ export default function Header() {
                         key={item.label}
                         type="button"
                         className="px-3 py-2 rounded hover:bg-neutral-100 text-left text-sm"
-                        onClick={() => { setOpen(false); goSection(item.to); }}
+                        onClick={() => {
+                          setOpen(false);
+                          goSection(item.to);
+                        }}
                       >
                         {item.label}
                       </button>
                     )
                   )}
 
-                  <button
-                    type="button"
-                    className={tokens.button.primary + " mt-2"}
-                    onClick={() => { setOpen(false); goSection("pricing"); }}
+                  {/* Mobile login button, same darker glass for contrast */}
+                  <Link
+                    to="/login"
+                    onClick={() => setOpen(false)}
+                    className="mt-2 px-4 py-2 rounded-xl text-center text-sm font-medium text-neutral-900 backdrop-blur-md bg-black/10 border border-black/20 hover:bg-black/15 ring-1 ring-black/5 shadow-sm transition"
                   >
-                    Subscribe $32.99
-                  </button>
+                    Log in
+                  </Link>
                 </div>
               </motion.div>
             )}
