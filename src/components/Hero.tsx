@@ -83,7 +83,6 @@ export default function Hero() {
           </button>
         </div>
 
-        <p className="mt-3 text-sm text-neutral-400">Takes 2 minutes. No spam.</p>
       </div>
 
       {/* Popup modal */}
