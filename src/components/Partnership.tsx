@@ -10,7 +10,7 @@ export default function Partnership() {
         <div className={`${tokens.card} p-0 overflow-hidden`}>
           <div className="bg-neutral-900 text-white px-6 py-10 md:px-10">
             <h3 className="text-xl md:text-2xl font-semibold text-center">
-              You made it to the end — unlock a free website audit and demo proposal
+              You made it to the end — Follow the prompt to unlock a free website
             </h3>
             <p className="mt-2 text-sm md:text-base text-white/80 text-center">
             </p>
