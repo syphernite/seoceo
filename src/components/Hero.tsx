@@ -91,7 +91,7 @@ export default function Hero() {
       </div>
 
       <div className={`${tokens?.container || "mx-auto max-w-6xl px-6"} py-20 text-center`}>
-        <h1 className="text-4xl md:text-6xl font-bold tracking-tight">Seo that pays for itself</h1>
+        <h1 className="text-4xl md:text-6xl font-bold tracking-tight">SEO that pays for itself</h1>
         <p className="mt-4 text-lg text-neutral-300">Quick and comprehensive audits. Action plans. We get clicks.</p>
 
         <div className="mt-8 flex items-center justify-center">
