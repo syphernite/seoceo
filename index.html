@@ -10,26 +10,26 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="mask-icon" href="/mask-icon.svg" color="#0B1120" />
     <link rel="manifest" href="/site.webmanifest" />
-    <link rel="canonical" id="canonical-link" href="" />
+    <link rel="canonical" id="canonical-link" href="https://seoecon.com/" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta name="generator" content="Vite + React" />
 
     <!-- Open Graph -->
     <meta property="og:site_name" content="SEO Econ" />
-    <meta property="og:title" content="SEO Econ - Quick, comprehensive SEO audits that drive clicks" />
+    <meta property="og:title" content="SEO Econ — Quick, comprehensive SEO audits that drive clicks" />
     <meta property="og:description" content="Actionable SEO audits with prioritized fixes, competitor intel, and growth roadmaps." />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="" id="og-url" />
-    <meta property="og:image" content="/og-image.svg" />
+    <meta property="og:url" content="https://seoecon.com/" />
+    <meta property="og:image" content="https://seoecon.com/og-image.svg" />
     <meta property="og:image:alt" content="SEO Econ - Get eyes on your business" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="SEO Econ - Quick, comprehensive SEO audits that drive clicks" />
+    <meta name="twitter:title" content="SEO Econ — Quick, comprehensive SEO audits that drive clicks" />
     <meta name="twitter:description" content="Actionable SEO audits with prioritized fixes, competitor intel, and growth roadmaps." />
-    <meta name="twitter:image" content="/og-image.svg" />
+    <meta name="twitter:image" content="https://seoecon.com/og-image.svg" />
 
-    <!-- Preconnect hints (safe defaults) -->
+    <!-- Preconnect hints -->
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
 
@@ -39,57 +39,88 @@
       "@context":"https://schema.org",
       "@type":"Organization",
       "name":"SEO Econ",
-      "url":"",
-      "logo":"/favicon.svg",
+      "url":"https://seoecon.com",
+      "logo":"https://seoecon.com/favicon.svg",
       "sameAs":[]
     }
     </script>
 
-    <!-- JSON-LD: WebSite + potentialAction -->
+    <!-- JSON-LD: Website + potentialAction -->
     <script type="application/ld+json">
     {
       "@context":"https://schema.org",
       "@type":"WebSite",
       "name":"SEO Econ",
-      "url":"",
+      "url":"https://seoecon.com",
       "potentialAction": {
         "@type":"SearchAction",
-        "target":"{url}#search?q={search_term_string}",
+        "target":"https://seoecon.com/#search?q={search_term_string}",
         "query-input":"required name=search_term_string"
       }
     }
     </script>
 
-    <!-- Caching controls -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
+    <!-- JSON-LD: Service (SEO Audit) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": "SEO Audit & Action Plan",
+      "serviceType": "Search engine optimization",
+      "provider": {
+        "@type": "Organization",
+        "name": "SEO Econ",
+        "url": "https://seoecon.com"
+      },
+      "areaServed": {
+        "@type": "Country",
+        "name": "United States"
+      },
+      "audience": {
+        "@type": "BusinessAudience",
+        "name": "Small and local businesses"
+      },
+      "description": "Comprehensive SEO audits with prioritized fixes, competitor insights, and a step-by-step growth roadmap.",
+      "offers": {
+        "@type": "Offer",
+        "url": "https://seoecon.com",
+        "availability": "https://schema.org/InStock"
+      }
+    }
+    </script>
 
-    <!-- Hydrate canonical and og:url at runtime so paths work on subfolders too -->
-    <script>
-      (function(){
-        try{
-          var href = window.location.href.split('#')[0];
-          var canon = document.getElementById('canonical-link');
-          if(canon) canon.setAttribute('href', href);
-          var ogUrl = document.getElementById('og-url');
-          if(ogUrl) ogUrl.setAttribute('content', href);
-          // also patch JSON-LD urls
-          Array.prototype.forEach.call(document.querySelectorAll('script[type="application/ld+json"]'), function(s){
-            try{
-              var data = JSON.parse(s.textContent);
-              if (typeof data === 'object') {
-                if (data.url !== undefined) data.url = href;
-                if (data.logo === '/favicon.svg') data.logo = new URL('/favicon.svg', href).toString();
-                if (data.potentialAction && data.potentialAction.target) {
-                  data.potentialAction.target = href + '#search?q={search_term_string}';
-                }
-                s.textContent = JSON.stringify(data);
-              }
-            }catch(e){}
-          });
-        }catch(e){}
-      })();
+    <!-- JSON-LD: FAQ (for rich results) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What do I get in an SEO Econ audit?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A clear action plan with prioritized fixes, competitor insight, and a practical roadmap that shows what to do first for the biggest impact."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How fast can I see results?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Technical fixes are immediate once implemented; rankings and traffic typically improve over weeks as pages are recrawled and re-evaluated."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Will you change my content?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "We respect your brand voice. Recommendations focus on structure, speed, internal links, and metadata—so you keep the message while gaining visibility."
+          }
+        }
+      ]
+    }
     </script>
   </head>
   <body>
