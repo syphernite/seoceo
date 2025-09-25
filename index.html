@@ -1,35 +1,96 @@
-<!-- index.html (Vite root) -->
 <!doctype html>
 <html lang="en">
   <head>
+    <!-- Core -->
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>SEO Econ</title>
-    <meta
-      name="description"
-      content="Quick, comprehensive SEO audits with action plans that drive clicks."
-    />
-    <meta name="theme-color" content="#0b0b0b" />
+    <meta name="description" content="Quick, comprehensive SEO audits with action plans that drive clicks." />
+    <meta name="theme-color" content="#0B1120" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="mask-icon" href="/mask-icon.svg" color="#0B1120" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="canonical" id="canonical-link" href="" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="generator" content="Vite + React" />
 
-    <!-- Correct favicon set. Put favicon.ico in /public -->
-    <link rel="icon" href="/favicon.ico" sizes="any" />
-
-    <!-- SEO -->
+    <!-- Open Graph -->
+    <meta property="og:site_name" content="SEO Econ" />
+    <meta property="og:title" content="SEO Econ - Quick, comprehensive SEO audits that drive clicks" />
+    <meta property="og:description" content="Actionable SEO audits with prioritized fixes, competitor intel, and growth roadmaps." />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="SEO Econ" />
-    <meta property="og:description" content="Quick, comprehensive SEO audits with action plans that drive clicks." />
-    <meta property="og:url" content="https://seo-econ.example" />
+    <meta property="og:url" content="" id="og-url" />
+    <meta property="og:image" content="/og-image.svg" />
+    <meta property="og:image:alt" content="SEO Econ - Get eyes on your business" />
 
-    <!-- Optional webmanifest if you add one in /public -->
-    <!-- <link rel="manifest" href="/site.webmanifest"> -->
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="SEO Econ - Quick, comprehensive SEO audits that drive clicks" />
+    <meta name="twitter:description" content="Actionable SEO audits with prioritized fixes, competitor intel, and growth roadmaps." />
+    <meta name="twitter:image" content="/og-image.svg" />
 
-    <!-- Cache-busting hint -->
+    <!-- Preconnect hints (safe defaults) -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+
+    <!-- JSON-LD: Organization -->
+    <script type="application/ld+json">
+    {
+      "@context":"https://schema.org",
+      "@type":"Organization",
+      "name":"SEO Econ",
+      "url":"",
+      "logo":"/favicon.svg",
+      "sameAs":[]
+    }
+    </script>
+
+    <!-- JSON-LD: WebSite + potentialAction -->
+    <script type="application/ld+json">
+    {
+      "@context":"https://schema.org",
+      "@type":"WebSite",
+      "name":"SEO Econ",
+      "url":"",
+      "potentialAction": {
+        "@type":"SearchAction",
+        "target":"{url}#search?q={search_term_string}",
+        "query-input":"required name=search_term_string"
+      }
+    }
+    </script>
+
+    <!-- Caching controls -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
+
+    <!-- Hydrate canonical and og:url at runtime so paths work on subfolders too -->
+    <script>
+      (function(){
+        try{
+          var href = window.location.href.split('#')[0];
+          var canon = document.getElementById('canonical-link');
+          if(canon) canon.setAttribute('href', href);
+          var ogUrl = document.getElementById('og-url');
+          if(ogUrl) ogUrl.setAttribute('content', href);
+          // also patch JSON-LD urls
+          Array.prototype.forEach.call(document.querySelectorAll('script[type="application/ld+json"]'), function(s){
+            try{
+              var data = JSON.parse(s.textContent);
+              if (typeof data === 'object') {
+                if (data.url !== undefined) data.url = href;
+                if (data.logo === '/favicon.svg') data.logo = new URL('/favicon.svg', href).toString();
+                if (data.potentialAction && data.potentialAction.target) {
+                  data.potentialAction.target = href + '#search?q={search_term_string}';
+                }
+                s.textContent = JSON.stringify(data);
+              }
+            }catch(e){}
+          });
+        }catch(e){}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

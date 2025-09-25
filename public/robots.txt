@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Crawl-delay examples (uncomment per-bot if needed)
+# User-agent: Googlebot
+# Crawl-delay: 1
+
+Sitemap: /sitemap.xml
